@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>>Resolucion de problemas de transporte</title>
+    <meta name="description" content="Aplicación web para resolver problemas de transporte usando métodos de investigación de operaciones">
+    
+    <!-- Estilos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/components.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-truck"></i> TransporteIO</h1>
+            <p>Universidad Mesoamericana - Investigación de Operaciones 2025</p>
+            <p>Solver de Problemas de Transporte con Visualización Paso a Paso</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel de Control -->
+            <div class="control-panel">
+                <!-- Configuración -->
+                <div class="section">
+                    <h3><i class="fas fa-cog"></i> Configuración</h3>
+                    
+                    <div class="input-group">
+                        <label for="num-origenes">Orígenes:</label>
+                        <input type="number" id="num-origenes" class="input-field" value="4" min="2" max="8">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="num-destinos">Destinos:</label>
+                        <input type="number" id="num-destinos" class="input-field" value="4" min="2" max="8">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generarMatriz()">
+                        <i class="fas fa-table"></i> Generar Matriz
+                    </button>
+                </div>
+
+                <!-- Métodos -->
+                <div class="section">
+                    <h3><i class="fas fa-calculator"></i> Métodos</h3>
+                    
+                    <div class="method-selector">
+                        <div class="method-card selected" data-method="costo_minimo">
+                            <h4>Costo Mínimo</h4>
+                            <p>Menor costo disponible</p>
+                        </div>
+                        
+                        <div class="method-card selected" data-method="esquina_noroeste">
+                            <h4>Esquina Noroeste</h4>
+                            <p>Sistemático desde (1,1)</p>
+                        </div>
+                        
+                        <div class="method-card selected" data-method="vogel">
+                            <h4>Vogel (VAM)</h4>
+                            <p>Penalizaciones</p>
+                        </div>
+                        
+                        <div class="method-card selected" data-method="russell">
+                            <h4>Russell</h4>
+                            <p>Índices ui/vj</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <div class="section">
+                    <h3><i class="fas fa-play"></i> Resolver</h3>
+                    
+                    <button class="btn btn-warning" onclick="validarDatos()" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-check-circle"></i> Validar
+                    </button>
+                    
+                    <button class="btn btn-success" onclick="resolverProblema()" style="width: 100%; margin-bottom: 10px;" disabled id="btn-resolver">
+                        <i class="fas fa-rocket"></i> Resolver
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="limpiarTodo()" style="width: 100%;">
+                        <i class="fas fa-trash"></i> Limpiar
+                    </button>
+                </div>
+
+                <!-- Ejemplos -->
+                <div class="section">
+                    <h3><i class="fas fa-book"></i> Ejemplos</h3>
+                    
+                    <button class="btn btn-primary" onclick="cargarEjemplo(1)" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-file-import"></i> Ejemplo 1 (4x4)
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="cargarEjemplo(2)" style="width: 100%;">
+                        <i class="fas fa-file-import"></i> Ejemplo 2 (3x3)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área de Visualización -->
+            <div class="visualization-area">
+                <!-- Bienvenida -->
+                <div id="welcome-message">
+                    <h2><i class="fas fa-info-circle"></i> Bienvenido a TransporteIO</h2>
+                    <p>Resuelve problemas de transporte con 4 métodos diferentes:</p>
+                    <ul style="margin: 20px 0; padding-left: 30px;">
+                        <li><strong>Costo Mínimo:</strong> Asigna al menor costo</li>
+                        <li><strong>Esquina Noroeste:</strong> Sistemático desde (1,1)</li>
+                        <li><strong>Vogel:</strong> Penalizaciones por diferencias</li>
+                        <li><strong>Russell:</strong> Índices ui y vj</li>
+                    </ul>
+                </div>
+
+                <!-- Matriz -->
+                <div id="matriz-container" style="display: none;">
+                    <h3><i class="fas fa-table"></i> Problema de Transporte</h3>
+                    <div id="matriz-datos"></div>
+                    
+                    <div class="network-visualization" id="network-model">
+                        <div class="network-placeholder">
+                            <i class="fas fa-project-diagram fa-3x"></i>
+                            <p>Modelo de red se generará después de resolver</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <h3>Resolviendo...</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div id="resultados-container" style="display: none;">
+                    <h2><i class="fas fa-chart-line"></i> Resultados</h2>
+                    <div id="tabla-comparacion"></div>
+                    <div id="resultados-detallados"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ui-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualization.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/network-visualization.js') }}"></script>
+</body>
+</html>
